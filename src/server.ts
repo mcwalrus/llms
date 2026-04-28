@@ -20,8 +20,6 @@ import Fastify, {
   onReadyHookHandler,
   onListenHookHandler,
   onCloseHookHandler,
-  FastifyBaseLogger,
-  FastifyLoggerOptions,
   FastifyServerOptions,
 } from "fastify";
 import cors from "@fastify/cors";

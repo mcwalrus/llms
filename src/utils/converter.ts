@@ -1,5 +1,4 @@
 import type { ChatCompletionMessageParam as OpenAIMessage } from "openai/resources/chat/completions";
-import type { MessageParam as AnthropicMessage } from "@anthropic-ai/sdk/resources/messages";
 import type { ChatCompletionTool } from "openai/resources/chat/completions";
 import type { Tool as AnthropicTool } from "@anthropic-ai/sdk/resources/messages";
 import {
@@ -10,7 +9,6 @@ import {
   AnthropicChatRequest,
   ConversionOptions,
 } from "../types/llm";
-import { log } from "./log";
 
 export function convertToolsToOpenAI(
   tools: UnifiedTool[]
