@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "fs";
+import fs from "fs";
 import { join } from "path";
 import { config } from "dotenv";
 import JSON5 from 'json5';
@@ -69,9 +69,9 @@ export class ConfigService {
       ? this.options.jsonPath
       : join(process.cwd(), this.options.jsonPath);
 
-    if (existsSync(jsonPath)) {
+    if (fs.existsSync(jsonPath)) {
       try {
-        const jsonContent = readFileSync(jsonPath, "utf-8");
+        const jsonContent = fs.readFileSync(jsonPath, "utf-8");
         const jsonConfig = JSON5.parse(jsonContent);
         this.config = { ...this.config, ...jsonConfig };
         console.log(`Loaded JSON config from: ${jsonPath}`);
@@ -88,7 +88,7 @@ export class ConfigService {
       ? this.options.envPath!
       : join(process.cwd(), this.options.envPath!);
 
-    if (existsSync(envPath)) {
+    if (fs.existsSync(envPath)) {
       try {
         const result = config({ path: envPath });
         if (result.parsed) {

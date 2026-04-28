@@ -18,7 +18,8 @@
     "dev": "nodemon",
     "start": "node dist/cjs/server.cjs",
     "start:esm": "node dist/esm/server.mjs",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "tsx node_modules/mocha/bin/mocha test/**/*.spec.ts"
   },
   "keywords": [],
   "author": "",
@@ -43,11 +44,12 @@
     "@types/sinon": "^17.0.4",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
-    "chai": "^5.2.0",
+    "chai": "^5.3.3",
     "esbuild": "^0.25.5",
     "eslint": "^9.30.0",
+    "mocha": "^11.7.5",
     "nodemon": "^3.1.10",
-    "sinon": "^21.0.0",
+    "sinon": "^21.1.2",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.0"

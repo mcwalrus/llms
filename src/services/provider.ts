@@ -148,7 +148,7 @@ export class ProviderService {
 
     if (updates.models) {
       provider.models.forEach((model) => {
-        const fullModel = `${provider.id},${model}`;
+        const fullModel = `${provider.name},${model}`;
         this.modelRoutes.delete(fullModel);
         this.modelRoutes.delete(model);
       });
