@@ -8,6 +8,7 @@ import { RegisterProviderRequest, LLMProvider } from "@/types/llm";
 import { sendUnifiedRequest } from "@/utils/request";
 import { createApiError } from "./middleware";
 import { version } from "../../package.json";
+import * as client from "prom-client";
 
 /**
  * 处理transformer端点的主函数
@@ -365,6 +366,73 @@ export const registerApiRoutes: FastifyPluginAsync = async (
         }
       );
     }
+  }
+
+  // Metrics endpoint
+  const configService = fastify._server!.configService;
+  const metricsPort = configService.get<number>("METRICS_PORT");
+  if (metricsPort) {
+    client.collectDefaultMetrics({ register: client.register });
+    const llmRequestsTotal = new client.Counter({
+      name: "llm_requests_total",
+      help: "Total LLM requests processed",
+      labelNames: ["provider", "model", "transformer", "status"],
+      registers: [client.register],
+    });
+
+    fastify.get("/metrics", async (_req: FastifyRequest, reply: FastifyReply) => {
+      reply.header("Content-Type", client.register.contentType);
+      return reply.send(await client.register.metrics());
+    });
+
+    // Attach counter to fastify for use in transformer handlers
+    (fastify as any).llmRequestsTotal = llmRequestsTotal;
+  }
+
+  // Debug endpoints (only when DEBUG_ROUTES is true or NODE_ENV !== "production")
+  const debugRoutes =
+    configService.get<boolean>("DEBUG_ROUTES") ||
+    configService.get<string>("NODE_ENV") !== "production";
+
+  if (debugRoutes) {
+    fastify.get("/debug/providers", async () => {
+      return fastify._server!.providerService.getProviders();
+    });
+
+    fastify.post(
+      "/debug/transform",
+      async (req: FastifyRequest, reply: FastifyReply) => {
+        const body = req.body as Record<string, unknown>;
+        const providerName = (body.provider as string) || "";
+        const model = (body.model as string) || "";
+
+        if (!providerName || !model) {
+          throw createApiError(
+            "Missing provider or model in request body",
+            400,
+            "invalid_request"
+          );
+        }
+
+        const provider = fastify._server!.providerService.getProvider(providerName);
+        if (!provider) {
+          throw createApiError(
+            `Provider '${providerName}' not found`,
+            404,
+            "provider_not_found"
+          );
+        }
+
+        const transformer = fastify._server!.transformerService.getTransformer(providerName);
+        const t = transformer as { endPoint?: string } | undefined;
+
+        return {
+          transformedRequest: body,
+          provider: providerName,
+          endpoint: t?.endPoint ?? "/v1/messages",
+        };
+      }
+    );
   }
 
   fastify.post(
