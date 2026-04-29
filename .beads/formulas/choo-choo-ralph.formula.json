@@ -1,0 +1,94 @@
+{
+  "formula": "choo-choo-ralph",
+  "description": "Multi-step workflow for building production features with agent sub-workflows",
+  "phase": "liquid",
+  "variables": {
+    "title": {
+      "description": "Task title",
+      "default": "Untitled Task"
+    },
+    "task": {
+      "description": "Detailed task description",
+      "default": "No description provided."
+    },
+    "category": {
+      "description": "Category label",
+      "default": "feature"
+    },
+    "auto_discovery": {
+      "description": "Enable gap discovery step",
+      "default": "false"
+    },
+    "auto_learnings": {
+      "description": "Enable learning capture step",
+      "default": "false"
+    }
+  },
+  "steps": [
+    {
+      "id": "bearings",
+      "title": "Understand Task and Plan Bearings",
+      "description": "Understand the task, explore the codebase, and plan the implementation.",
+      "type": "task",
+      "assignee": "ralph-subagent-task",
+      "priority": 2
+    },
+    {
+      "id": "implement",
+      "title": "Implement Changes",
+      "description": "Implement the changes based on the bearings step.",
+      "type": "task",
+      "assignee": "ralph-subagent-task",
+      "priority": 2,
+      "depends_on": [
+        "bearings"
+      ]
+    },
+    {
+      "id": "verify",
+      "title": "Verify Implementation",
+      "description": "Verify the implementation works.",
+      "type": "task",
+      "assignee": "ralph-subagent-task",
+      "priority": 2,
+      "depends_on": [
+        "implement"
+      ]
+    },
+    {
+      "id": "commit",
+      "title": "Commit Changes",
+      "description": "Stage and commit the changes.",
+      "type": "task",
+      "assignee": "ralph-subagent-task",
+      "priority": 2,
+      "depends_on": [
+        "verify"
+      ]
+    },
+    {
+      "id": "gap-discovery",
+      "title": "Post-Commit Gap Discovery",
+      "description": "Check for gaps.",
+      "type": "task",
+      "assignee": "ralph-inline-skill",
+      "priority": 3,
+      "depends_on": [
+        "commit"
+      ],
+      "condition": "{{auto_discovery}} == 'true'"
+    },
+    {
+      "id": "learning-capture",
+      "title": "Post-Commit Learning Capture",
+      "description": "Record learnings.",
+      "type": "task",
+      "assignee": "ralph-inline-skill",
+      "priority": 3,
+      "depends_on": [
+        "commit"
+      ],
+      "condition": "{{auto_learnings}} == 'true'"
+    }
+  ]
+}
