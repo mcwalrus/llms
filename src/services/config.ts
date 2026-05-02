@@ -50,9 +50,9 @@ export class ConfigService {
       this.loadEnvConfig();
     }
 
-    // if (this.options.useEnvironmentVariables) {
-    //   this.loadEnvironmentVariables();
-    // }
+    if (this.options.useEnvironmentVariables) {
+      this.loadEnvironmentVariables();
+    }
 
     if (this.config.LOG_FILE) {
       process.env.LOG_FILE = this.config.LOG_FILE;
@@ -60,6 +60,25 @@ export class ConfigService {
     if (this.config.LOG) {
       process.env.LOG = this.config.LOG;
     }
+  }
+
+  private interpolateEnvVars(obj: any): any {
+    if (typeof obj === "string") {
+      return obj.replace(/\$\{([^}]+)\}/g, (_: string, varName: string) => {
+        return process.env[varName] ?? _;
+      });
+    }
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.interpolateEnvVars(item));
+    }
+    if (obj && typeof obj === "object") {
+      const result: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        result[key] = this.interpolateEnvVars(value);
+      }
+      return result;
+    }
+    return obj;
   }
 
   private loadJsonConfig(): void {
@@ -73,7 +92,7 @@ export class ConfigService {
       try {
         const jsonContent = fs.readFileSync(jsonPath, "utf-8");
         const jsonConfig = JSON5.parse(jsonContent);
-        this.config = { ...this.config, ...jsonConfig };
+        this.config = { ...this.config, ...this.interpolateEnvVars(jsonConfig) };
         console.log(`Loaded JSON config from: ${jsonPath}`);
       } catch (error) {
         console.warn(`Failed to load JSON config from ${jsonPath}:`, error);
