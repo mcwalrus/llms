@@ -1,3 +1,0 @@
-[submodule "simonw-llm"]
-	path = simonw-llm
-	url = https://github.com/simonw/LLM.git
